@@ -34,6 +34,14 @@ export const CONFIG = {
     MIN_PASSWORD_LENGTH: 8,
   },
 
+  // App-Generated Password Defaults
+  PASSWORD_GENERATION: {
+    LENGTH: 20,
+    // Unambiguous alphabet (excludes 0/O, 1/l/I and similar look-alikes)
+    // 54 characters => ~5.75 bits of entropy per character (~115 bits at length 20)
+    CHARSET: 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789',
+  },
+
   // Image & File Constraints
   LIMITS: {
     MAX_IMAGE_FILE_SIZE_BYTES: 25 * 1024 * 1024, // 25 MB
