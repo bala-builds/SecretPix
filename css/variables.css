@@ -1,0 +1,99 @@
+/* ==========================================================================
+   SecretPix — Design Tokens & Variables (Mint, Sage & Pistachio Palette)
+   ========================================================================== */
+
+:root {
+  /* Brand Colors */
+  --color-primary: #52796F;
+  --color-primary-dark: #354F46;
+  --color-primary-light: #648e83;
+  --color-secondary: #84A98C;
+  --color-secondary-light: #9dbca3;
+  --color-mint: #CADFD1;
+  --color-mint-light: #EBF4EE;
+  --color-pistachio: #DCE8C8;
+  --color-pistachio-light: #F2F7E8;
+
+  /* Surfaces & Neutrals */
+  --color-bg: #F7F9F6;
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #FAFCF9;
+  --color-surface-alt: #F0F4F1;
+
+  /* Typography Colors */
+  --color-text: #202923;
+  --color-text-secondary: #7B877E;
+  --color-text-muted: #9AA69D;
+  --color-text-inverse: #FFFFFF;
+
+  /* Borders & Dividers */
+  --color-border: #E7ECE7;
+  --color-border-hover: #CFD8CF;
+  --color-border-focus: #52796F;
+
+  /* Status Colors */
+  --color-success: #39845D;
+  --color-success-bg: #EAF5EE;
+  --color-error: #D9534F;
+  --color-error-bg: #FDF2F2;
+  --color-warning: #D48827;
+  --color-warning-bg: #FEF8ED;
+  --color-info: #4A7A8C;
+  --color-info-bg: #EEF6F9;
+
+  /* Typography System */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* Spacing Scale */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* Border Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Subtle Premium Shadows */
+  --shadow-xs: 0 1px 2px rgba(32, 41, 35, 0.04);
+  --shadow-sm: 0 2px 6px rgba(32, 41, 35, 0.04), 0 1px 2px rgba(32, 41, 35, 0.02);
+  --shadow-md: 0 6px 16px -2px rgba(53, 79, 70, 0.06), 0 2px 4px -1px rgba(53, 79, 70, 0.03);
+  --shadow-lg: 0 12px 32px -4px rgba(53, 79, 70, 0.08), 0 4px 12px -2px rgba(53, 79, 70, 0.03);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout Constraints */
+  --container-max: 1200px;
+  --header-height: 72px;
+}
