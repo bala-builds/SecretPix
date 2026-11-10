@@ -37,6 +37,7 @@ SecretPix combines military-grade authenticated encryption with pixel-level steg
 * **Key Derivation:** PBKDF2 using SHA-256 and **600,000 iterations** (strictly aligning with NIST SP 800-63B).
 * **Salt & Nonce:** Fresh 16-byte random salt and 12-byte initialization vector (IV) generated for every single encryption using `crypto.getRandomValues()`. Zero IV reuse.
 * **Integrity Guarantee:** Any alteration to the ciphertext or pixel data triggers an immediate authentication rejection.
+* **Password Generation:** One-click cryptographically secure password generator (20 random characters from an unambiguous alphabet, ~115 bits of entropy, via `crypto.getRandomValues()` with unbiased rejection sampling). Generated passwords are the recommended default; users can still choose their own password (minimum 8 characters). Passwords are never stored - keep them safe and share them separately from the image.
 
 ### 2. Steganography Engine
 * **Technique:** Least Significant Bit (LSB) substitution across Red, Green, and Blue color channels.
