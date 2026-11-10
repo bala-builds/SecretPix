@@ -4,7 +4,7 @@
 
 import { switchView, showToast, evaluatePasswordStrength, formatBytes, ICONS } from './ui.js';
 import { CONFIG } from './config.js';
-import { encryptMessage, decryptMessage, InvalidPasswordError } from './crypto.js';
+import { encryptMessage, decryptMessage, generateSecurePassword, InvalidPasswordError } from './crypto.js';
 import {
   validateImageFile,
   loadImageElement,
@@ -310,6 +310,11 @@ function initHideWorkspace() {
   });
 
   passwordInput.addEventListener('input', () => {
+    if (passwordMode === 'generated') {
+      // Read-only generated password; strength meter is managed by updateGeneratedPasswordUI
+      updateHideCapacityAndValidation();
+      return;
+    }
     const val = passwordInput.value;
     const strength = evaluatePasswordStrength(val);
     strengthFill.className = `strength-fill ${strength.className}`;
@@ -325,7 +330,95 @@ function initHideWorkspace() {
 
   const MIN_PASSWORD_LENGTH = CONFIG.CRYPTO.MIN_PASSWORD_LENGTH || 8;
 
+  // Password Mode: app-generated secure password (default) or manual entry
+  const passwordModeDesc = document.getElementById('hidePasswordModeDesc');
+  const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+  const generatedPasswordActions = document.getElementById('generatedPasswordActions');
+  const generatedPasswordNote = document.getElementById('generatedPasswordNote');
+  const copyGeneratedPasswordBtn = document.getElementById('copyGeneratedPasswordBtn');
+  const regeneratePasswordBtn = document.getElementById('regeneratePasswordBtn');
+  const passwordModeGeneratedBtn = document.getElementById('passwordModeGeneratedBtn');
+  const passwordModeManualBtn = document.getElementById('passwordModeManualBtn');
+  const toggleHidePasswordBtn = document.getElementById('toggleHidePassword');
+
+  let passwordMode = 'generated';
+
+  function updateGeneratedPasswordUI() {
+    const generated = generateSecurePassword();
+    passwordInput.value = generated;
+    strengthFill.className = 'strength-fill strong';
+    strengthText.textContent = `Generated secure password (${generated.length} random characters)`;
+  }
+
+  function setPasswordMode(mode) {
+    passwordMode = mode;
+    const isGenerated = mode === 'generated';
+
+    passwordModeGeneratedBtn.classList.toggle('active', isGenerated);
+    passwordModeManualBtn.classList.toggle('active', !isGenerated);
+
+    confirmPasswordGroup.classList.toggle('hidden', isGenerated);
+    generatedPasswordActions.classList.toggle('hidden', !isGenerated);
+    generatedPasswordNote.classList.toggle('hidden', !isGenerated);
+    toggleHidePasswordBtn.style.display = isGenerated ? 'none' : '';
+
+    passwordInput.readOnly = isGenerated;
+    passwordInput.type = isGenerated ? 'text' : 'password';
+    passwordModeDesc.textContent = isGenerated
+      ? 'Cryptographically generated - used for AES-256-GCM derivation'
+      : `Used for AES-256-GCM derivation (min ${MIN_PASSWORD_LENGTH} chars)`;
+
+    if (isGenerated) {
+      updateGeneratedPasswordUI();
+      passwordMatchBadge.textContent = '';
+    } else {
+      passwordInput.value = '';
+      confirmPasswordInput.value = '';
+      passwordInput.placeholder = 'Enter a strong password';
+      toggleHidePasswordBtn.innerHTML = ICONS.EYE;
+      strengthFill.className = 'strength-fill';
+      strengthText.textContent = 'Password strength';
+      checkPasswordsMatch();
+    }
+
+    updateHideCapacityAndValidation();
+  }
+
+  passwordModeGeneratedBtn.addEventListener('click', () => setPasswordMode('generated'));
+  passwordModeManualBtn.addEventListener('click', () => setPasswordMode('manual'));
+
+  regeneratePasswordBtn.addEventListener('click', () => {
+    updateGeneratedPasswordUI();
+    updateHideCapacityAndValidation();
+    showToast('New secure password generated. Save it somewhere safe.', 'info', 2500);
+  });
+
+  copyGeneratedPasswordBtn.addEventListener('click', async () => {
+    const pwd = passwordInput.value;
+    if (!pwd) return;
+    try {
+      await navigator.clipboard.writeText(pwd);
+      showToast('Password copied. Save it somewhere safe.', 'success', 2500);
+    } catch (err) {
+      const textarea = document.createElement('textarea');
+      textarea.value = pwd;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast('Password copied. Save it somewhere safe.', 'success', 2500);
+    }
+  });
+
+  // Default to the app-generated secure password mode
+  setPasswordMode('generated');
+
   function checkPasswordsMatch() {
+    if (passwordMode === 'generated') {
+      // No confirmation needed for a generated password shown in plain text
+      passwordMatchBadge.textContent = '';
+      return true;
+    }
     const pwd = passwordInput.value;
     const confirm = confirmPasswordInput.value;
     if (!confirm && !pwd) {
@@ -357,7 +450,9 @@ function initHideWorkspace() {
     const message = messageInput.value.trim();
     const password = passwordInput.value;
     const confirm = confirmPasswordInput.value;
-    const passwordsMatch = password.length >= MIN_PASSWORD_LENGTH && password === confirm;
+    const passwordsValid = passwordMode === 'generated'
+      ? password.length >= MIN_PASSWORD_LENGTH
+      : password.length >= MIN_PASSWORD_LENGTH && password === confirm;
 
     if (hasImage) {
       const textBytesLength = new TextEncoder().encode(message).length;
@@ -380,7 +475,7 @@ function initHideWorkspace() {
         capacityPercentBadge.className = 'badge badge-mint font-mono';
       }
 
-      const isValid = hasImage && message.length > 0 && passwordsMatch && !capacity.isOverCapacity;
+      const isValid = hasImage && message.length > 0 && passwordsValid && !capacity.isOverCapacity;
       encryptBtn.disabled = !isValid;
     } else {
       encryptBtn.disabled = true;
