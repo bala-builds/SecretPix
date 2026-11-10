@@ -31,11 +31,13 @@ export const CONFIG = {
     IV_LENGTH_BYTES: 12,
     PBKDF2_HASH: 'SHA-256',
     PBKDF2_ITERATIONS: 600000, // NIST Recommended baseline
+    MIN_PASSWORD_LENGTH: 8,
   },
 
   // Image & File Constraints
   LIMITS: {
     MAX_IMAGE_FILE_SIZE_BYTES: 25 * 1024 * 1024, // 25 MB
+    MAX_IMAGE_PIXELS: 25000000, // 25 Megapixels (~100 MB uncompressed ImageData)
     SUPPORTED_INPUT_MIME_TYPES: [
       'image/png',
       'image/jpeg',

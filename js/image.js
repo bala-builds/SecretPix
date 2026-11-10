@@ -52,7 +52,7 @@ export function validateImageFile(file) {
 
 /**
  * Load a File into an HTMLImageElement
- * Automatically handles Object URL revocation to prevent memory leaks.
+ * Attaches the objectUrl to img._objectUrl for caller lifecycle management.
  * @param {File} file
  * @returns {Promise<HTMLImageElement>}
  */
@@ -64,8 +64,7 @@ export function loadImageElement(file) {
     const img = new Image();
 
     img.onload = () => {
-      // Memory cleanup: Revoke URL immediately after image element decodes
-      URL.revokeObjectURL(objectUrl);
+      img._objectUrl = objectUrl;
       resolve(img);
     };
 
@@ -79,6 +78,19 @@ export function loadImageElement(file) {
 }
 
 /**
+ * Revoke the object URL associated with an image element
+ * @param {HTMLImageElement} img
+ */
+export function revokeImageElement(img) {
+  if (img && img._objectUrl) {
+    try {
+      URL.revokeObjectURL(img._objectUrl);
+    } catch (e) {}
+    img._objectUrl = null;
+  }
+}
+
+/**
  * Render an HTMLImageElement to an offscreen Canvas and extract its ImageData
  * @param {HTMLImageElement} img
  * @returns {{ canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, imageData: ImageData, width: number, height: number }}
@@ -89,6 +101,15 @@ export function extractImageDataFromImage(img) {
 
   if (!width || !height || width <= 0 || height <= 0) {
     throw new ImageProcessingError('Invalid image dimensions.', 'INVALID_DIMENSIONS');
+  }
+
+  // Dimension Guard: Reject images where width * height > 25,000,000 pixels (~100 MB of ImageData)
+  const maxPixels = CONFIG.LIMITS.MAX_IMAGE_PIXELS || 25000000;
+  if (width * height > maxPixels) {
+    throw new ImageProcessingError(
+      'Image dimensions are too large to process safely (exceeds 25 megapixels).',
+      'DIMENSIONS_TOO_LARGE'
+    );
   }
 
   const canvas = document.createElement('canvas');

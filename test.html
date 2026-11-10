@@ -110,7 +110,7 @@
   <!-- Test Runner Script -->
   <script type="module">
     import { encryptMessage, decryptMessage, getRandomBytes, InvalidPasswordError, CryptoError } from './js/crypto.js';
-    import { calculateCapacity, validateImageFile } from './js/image.js';
+    import { calculateCapacity, validateImageFile, extractImageDataFromImage, ImageProcessingError } from './js/image.js';
     import {
       packPayload,
       unpackPayload,
@@ -237,6 +237,21 @@
         renderTestResult('Test 6: Capacity Calculation Math (1920 × 1080 Full HD)', valid, `Raw capacity: ${cap.rawCapacityBytes.toLocaleString()} bytes. Usable: ${cap.usableCapacityBytes.toLocaleString()} bytes.`);
       } catch (e) {
         renderTestResult('Test 6: Capacity Calculation Math (1920 × 1080 Full HD)', false, e.message);
+      }
+
+      // Test 6B: Image Pixel Dimensions Limit Guard (> 25 Megapixels)
+      try {
+        let dimBlocked = false;
+        try {
+          extractImageDataFromImage({ naturalWidth: 7000, naturalHeight: 4000 }); // 28 megapixels
+        } catch (err) {
+          if (err instanceof ImageProcessingError && err.code === 'DIMENSIONS_TOO_LARGE') {
+            dimBlocked = true;
+          }
+        }
+        renderTestResult('Test 6B: Image Dimensions Limit Guard (> 25 MP)', dimBlocked, `Oversized image (7000 × 4000 = 28 MP) successfully rejected with DIMENSIONS_TOO_LARGE.`);
+      } catch (e) {
+        renderTestResult('Test 6B: Image Dimensions Limit Guard (> 25 MP)', false, e.message);
       }
 
       // Test 7: Binary Protocol Packing & Unpacking

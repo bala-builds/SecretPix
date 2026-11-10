@@ -8,6 +8,7 @@ import { encryptMessage, decryptMessage, InvalidPasswordError } from './crypto.j
 import {
   validateImageFile,
   loadImageElement,
+  revokeImageElement,
   extractImageDataFromImage,
   calculateCapacity,
   exportImageDataToPngBlob,
@@ -189,6 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (cardHide) cardHide.addEventListener('click', () => switchView('viewHide'));
   if (cardReveal) cardReveal.addEventListener('click', () => switchView('viewReveal'));
 
+  // Footer Navigation Link
+  const footerAboutLink = document.getElementById('footerAboutLink');
+  if (footerAboutLink) {
+    footerAboutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchView('viewAbout');
+    });
+  }
+
   // Password Visibility Toggles
   setupPasswordToggle('toggleHidePassword', 'hidePasswordInput');
   setupPasswordToggle('toggleRevealPassword', 'revealPasswordInput');
@@ -205,11 +215,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function initHideWorkspace() {
   const dropzone = document.getElementById('hideDropzone');
   const fileInput = document.getElementById('hideFileInput');
+  const browseBtn = document.getElementById('hideBrowseBtn');
   const previewBox = document.getElementById('hideImagePreviewBox');
   const previewImg = document.getElementById('hideImagePreview');
   const fileNameText = document.getElementById('hideImageFileName');
   const dimensionsText = document.getElementById('hideImageDimensions');
   const removeBtn = document.getElementById('hideRemoveImageBtn');
+
+  if (browseBtn) {
+    browseBtn.addEventListener('click', () => fileInput.click());
+  }
 
   const messageInput = document.getElementById('hideMessageInput');
   const charCountLabel = document.getElementById('charCountLabel');
@@ -243,6 +258,9 @@ function initHideWorkspace() {
       const img = await loadImageElement(file);
       const { imageData, width, height } = extractImageDataFromImage(img);
 
+      // Clean up previous image element object URL if any
+      revokeImageElement(state.hide.imageElement);
+
       state.hide.file = file;
       state.hide.imageElement = img;
       state.hide.imageData = imageData;
@@ -267,6 +285,8 @@ function initHideWorkspace() {
 
   // Remove Image & Scrub State
   removeBtn.addEventListener('click', () => {
+    revokeImageElement(state.hide.imageElement);
+
     state.hide.file = null;
     state.hide.imageElement = null;
     state.hide.imageData = null;
@@ -303,9 +323,20 @@ function initHideWorkspace() {
     updateHideCapacityAndValidation();
   });
 
+  const MIN_PASSWORD_LENGTH = CONFIG.CRYPTO.MIN_PASSWORD_LENGTH || 8;
+
   function checkPasswordsMatch() {
     const pwd = passwordInput.value;
     const confirm = confirmPasswordInput.value;
+    if (!confirm && !pwd) {
+      passwordMatchBadge.textContent = '';
+      return false;
+    }
+    if (pwd.length < MIN_PASSWORD_LENGTH) {
+      passwordMatchBadge.textContent = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
+      passwordMatchBadge.style.color = 'var(--color-error)';
+      return false;
+    }
     if (!confirm) {
       passwordMatchBadge.textContent = '';
       return false;
@@ -326,7 +357,7 @@ function initHideWorkspace() {
     const message = messageInput.value.trim();
     const password = passwordInput.value;
     const confirm = confirmPasswordInput.value;
-    const passwordsMatch = password.length > 0 && password === confirm;
+    const passwordsMatch = password.length >= MIN_PASSWORD_LENGTH && password === confirm;
 
     if (hasImage) {
       const textBytesLength = new TextEncoder().encode(message).length;
@@ -420,10 +451,15 @@ function initHideWorkspace() {
 function initRevealWorkspace() {
   const dropzone = document.getElementById('revealDropzone');
   const fileInput = document.getElementById('revealFileInput');
+  const browseBtn = document.getElementById('revealBrowseBtn');
   const previewBox = document.getElementById('revealImagePreviewBox');
   const previewImg = document.getElementById('revealImagePreview');
   const fileNameText = document.getElementById('revealImageFileName');
   const removeBtn = document.getElementById('revealRemoveImageBtn');
+
+  if (browseBtn) {
+    browseBtn.addEventListener('click', () => fileInput.click());
+  }
 
   const detectionBadge = document.getElementById('revealDetectionBadge');
   const detectionIcon = document.getElementById('revealDetectionIcon');
@@ -453,6 +489,9 @@ function initRevealWorkspace() {
       validateImageFile(file);
       const img = await loadImageElement(file);
       const { imageData } = extractImageDataFromImage(img);
+
+      // Clean up previous image element object URL if any
+      revokeImageElement(state.reveal.imageElement);
 
       state.reveal.file = file;
       state.reveal.imageElement = img;
@@ -491,6 +530,8 @@ function initRevealWorkspace() {
 
   // Remove Image & Scrub State
   removeBtn.addEventListener('click', () => {
+    revokeImageElement(state.reveal.imageElement);
+
     state.reveal.file = null;
     state.reveal.imageElement = null;
     state.reveal.imageData = null;

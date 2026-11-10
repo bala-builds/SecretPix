@@ -2,7 +2,7 @@
  * Unit Test Suite for SecretPix Image & Capacity Engine
  */
 
-import { validateImageFile, calculateCapacity, ImageProcessingError } from '../js/image.js';
+import { validateImageFile, calculateCapacity, extractImageDataFromImage, ImageProcessingError } from '../js/image.js';
 import { CONFIG } from '../js/config.js';
 
 function runTests() {
@@ -89,6 +89,19 @@ function runTests() {
     } catch (e) {}
     assert(oversizedRejected, 'File exceeding 25 MB triggers size limit rejection');
   }
+
+  // Test 5: Image Pixel Dimensions Guard (> 25 Megapixels)
+  console.log('\n[Test 5] Image Dimensions Guard (Max 25 Megapixels)');
+  let dimensionsRejected = false;
+  try {
+    const hugeMockImg = { naturalWidth: 6000, naturalHeight: 5000 }; // 30 megapixels
+    extractImageDataFromImage(hugeMockImg);
+  } catch (err) {
+    if (err instanceof ImageProcessingError && err.code === 'DIMENSIONS_TOO_LARGE') {
+      dimensionsRejected = true;
+    }
+  }
+  assert(dimensionsRejected, 'Image exceeding 25 megapixels (e.g. 6000x5000) is rejected with DIMENSIONS_TOO_LARGE');
 
   console.log(`\n========================================`);
   console.log(`All ${passed}/${total} Image & Capacity tests PASSED successfully!`);
