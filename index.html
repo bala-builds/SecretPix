@@ -255,18 +255,40 @@
                 <textarea id="hideMessageInput" class="textarea-field" placeholder="Type or paste the confidential text you wish to hide..."></textarea>
               </div>
 
+              <!-- Password Mode Selector -->
+              <div class="form-group">
+                <div class="password-mode-toggle" role="group" aria-label="Password mode">
+                  <button type="button" class="password-mode-btn active" id="passwordModeGeneratedBtn">Generate for me (Recommended)</button>
+                  <button type="button" class="password-mode-btn" id="passwordModeManualBtn">Choose my own</button>
+                </div>
+              </div>
+
               <!-- Password -->
               <div class="form-group">
                 <div class="form-label">
                   <label for="hidePasswordInput">Encryption Password</label>
-                  <span class="form-label-desc">Used for AES-256-GCM derivation (min 8 chars)</span>
+                  <span class="form-label-desc" id="hidePasswordModeDesc">Cryptographically generated - used for AES-256-GCM derivation</span>
                 </div>
                 <div class="password-input-wrapper">
-                  <input type="password" id="hidePasswordInput" class="input-field" placeholder="Enter a strong password">
-                  <button type="button" class="password-toggle-btn" id="toggleHidePassword" aria-label="Toggle password visibility">
+                  <input type="text" id="hidePasswordInput" class="input-field" placeholder="Generate or enter a password" readonly>
+                  <button type="button" class="password-toggle-btn" id="toggleHidePassword" aria-label="Toggle password visibility" style="display: none;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
+                <!-- Generated Password Actions -->
+                <div id="generatedPasswordActions" class="generated-password-actions">
+                  <button type="button" class="btn btn-outline btn-sm" id="copyGeneratedPasswordBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy Password
+                  </button>
+                  <button type="button" class="btn btn-outline btn-sm" id="regeneratePasswordBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    Regenerate
+                  </button>
+                </div>
+                <p id="generatedPasswordNote" class="generated-password-note">
+                  Save this password somewhere safe and share it separately from the image. It is never stored - if you lose it, the message cannot be recovered.
+                </p>
                 <!-- Strength Bar -->
                 <div class="strength-indicator">
                   <div class="strength-bar">
@@ -276,8 +298,8 @@
                 </div>
               </div>
 
-              <!-- Confirm Password -->
-              <div class="form-group">
+              <!-- Confirm Password (manual mode only) -->
+              <div class="form-group hidden" id="confirmPasswordGroup">
                 <div class="form-label">
                   <label for="hideConfirmPasswordInput">Confirm Password</label>
                   <span id="passwordMatchBadge" class="form-label-desc"></span>
@@ -463,6 +485,10 @@
           <span class="font-mono" style="font-weight: 600; color: var(--color-primary-dark);">Lossless PNG</span>
         </div>
       </div>
+
+      <p style="font-size: var(--text-xs); color: var(--color-text-secondary); text-align: center; margin: -0.5rem 0 1.5rem;">
+        Your password is never stored. Keep it safe and share it separately from the image - without it, the message cannot be recovered.
+      </p>
 
       <div style="display: flex; gap: var(--space-3);">
         <button type="button" class="btn btn-primary" id="downloadEncodedImageBtn" style="flex: 2;">
