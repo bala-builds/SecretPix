@@ -2,7 +2,7 @@
  * Unit Test Suite for SecretPix Cryptographic Engine
  */
 
-import { encryptMessage, decryptMessage, getRandomBytes, InvalidPasswordError, CryptoError } from '../js/crypto.js';
+import { encryptMessage, decryptMessage, getRandomBytes, generateSecurePassword, InvalidPasswordError, CryptoError } from '../js/crypto.js';
 import { CONFIG } from '../js/config.js';
 
 async function runTests() {
@@ -96,6 +96,30 @@ async function runTests() {
     if (err instanceof CryptoError) emptyRejected = true;
   }
   assert(emptyRejected, 'Empty plaintext throws CryptoError');
+
+  // Test 8: Secure Password Generation
+  console.log('\n[Test 8] Secure Password Generation');
+  const gen1 = generateSecurePassword();
+  const gen2 = generateSecurePassword();
+  assert(gen1.length === CONFIG.PASSWORD_GENERATION.LENGTH, 'Generated password matches configured length');
+  assert(gen1 !== gen2, 'Successive generated passwords are distinct');
+  const allowedCharset = CONFIG.PASSWORD_GENERATION.CHARSET;
+  assert([...gen1].every((c) => allowedCharset.includes(c)), 'Generated password uses only the unambiguous charset');
+
+  console.log('Verifying a generated password completes the full round-trip...');
+  const encGen = await encryptMessage(secretText, gen1);
+  const decGen = await decryptMessage(encGen.ciphertext, encGen.salt, encGen.iv, gen1);
+  assert(decGen === secretText, 'Generated password completes full encrypt/decrypt round-trip');
+
+  // Test 9: Generator Input Validation
+  console.log('\n[Test 9] Generator Input Validation');
+  let badLengthRejected = false;
+  try {
+    generateSecurePassword(0);
+  } catch (err) {
+    if (err instanceof CryptoError) badLengthRejected = true;
+  }
+  assert(badLengthRejected, 'Zero-length generated password throws CryptoError');
 
   console.log(`\n========================================`);
   console.log(`All ${passed}/${total} Crypto Engine tests PASSED successfully!`);
