@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SecretPix — Hide in Plain Sight
 
 > **A privacy-first client-side image steganography and encryption web application.**  
@@ -136,3 +137,6 @@ node tests/test_crypto_stego_roundtrip.js
 
 ## 📄 License
 MIT License. Created for private, secure communication.
+=======
+# SecretPix
+>>>>>>> 85f62d7994e37010405aed6d31d92d3366ce354f
