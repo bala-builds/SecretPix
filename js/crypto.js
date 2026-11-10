@@ -43,6 +43,46 @@ export function getRandomBytes(length) {
 }
 
 /**
+ * Generate a cryptographically secure random password
+ *
+ * Uses the CSPRNG with rejection sampling to avoid modulo bias, and an
+ * unambiguous default charset (no easily confused characters like 0/O or 1/l/I).
+ * A 20-character password from the 54-character default alphabet provides
+ * ~115 bits of entropy, far beyond practical offline guessing attacks.
+ *
+ * @param {number} length - Desired password length (default: CONFIG.PASSWORD_GENERATION.LENGTH)
+ * @param {string} charset - Allowed characters (default: CONFIG.PASSWORD_GENERATION.CHARSET)
+ * @returns {string}
+ */
+export function generateSecurePassword(
+  length = CONFIG.PASSWORD_GENERATION.LENGTH,
+  charset = CONFIG.PASSWORD_GENERATION.CHARSET
+) {
+  if (!Number.isInteger(length) || length < 1) {
+    throw new CryptoError('Password length must be a positive integer.');
+  }
+  if (typeof charset !== 'string' || charset.length < 2) {
+    throw new CryptoError('Password charset must contain at least 2 characters.');
+  }
+
+  // Largest multiple of charset.length that fits in a byte; bytes at or above
+  // this value are discarded so every character is equally likely.
+  const maxUnbiased = Math.floor(256 / charset.length) * charset.length;
+
+  const result = [];
+  while (result.length < length) {
+    const bytes = getRandomBytes(length);
+    for (let i = 0; i < bytes.length && result.length < length; i++) {
+      if (bytes[i] < maxUnbiased) {
+        result.push(charset[bytes[i] % charset.length]);
+      }
+    }
+  }
+
+  return result.join('');
+}
+
+/**
  * Derive an AES-256-GCM CryptoKey from a password and salt using PBKDF2
  * @param {string} password - User-provided password
  * @param {Uint8Array} salt - 16-byte random salt
